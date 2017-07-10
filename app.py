@@ -222,10 +222,10 @@ def searchCabinet():
 
 # enter the number of the server to set the server on the cabinet
 # and also need check whether this server can be set on the cabinet
-@app.route('/search', methods=['POST'])
+@app.route('/searchmm', methods=['POST'])
 def serverOnCabinet():
     serverNumbering = request.form["serverNumbering"] #to get the data from the front end
-    to do the right thing(1-put the server on the cabinet; 2-fetch the server from the cabinet; 3-turn the server on; 4-turn the server off)
+    #to do the right thing(1-put the server on the cabinet; 2-fetch the server from the cabinet; 3-turn the server on; 4-turn the server off)
     serviceNumber = request.form["serviceNumber"]
     cabinetNumber = request.form["cabinetNumber"]
     startPosition = request.form["startPosition"]
@@ -321,6 +321,33 @@ def serverOnCabinet():
         )
         return("success")
 
+# to delete the particular server
+@app.route('/searchzz', methods=['POST'])
+def deleteServer():
+    serverNumbering = request.form["serverNumering"] #to get the data from the front end
+    num = str(serverNumbering)
+    #num = str(128)
+    client = MongoClient() #making a connection with MongoClient
+    db = client.IDCs #getting a database of MongoDB
+    db.server.delete_one({'Numbering': num})
+    return("success")
+
+#return all the documents of the cabinets
+@app.route('/search', methods=['POST'])
+def cabinetPower():
+    client = MongoClient() #making a connection with MongoClient
+    db = client.IDCs #getting a database of MongoDB
+    collection = db.Cabinet #getting a collection(table)
+    cursor=collection.find()
+    resultlist={}
+    for record in cursor:
+        cabinetNumber = int(record["Numbering"])
+        resultlist[str(cabinetNumber)] ={
+            "cabinetNumber":str(cabinetNumber),
+            "thresholdPowerLoad" : str(record["thresholdPowerLoad"])
+        }
+    jsonStr = json.dumps(resultlist)
+    return jsonStr
 
 if __name__ == '__main__':
     app.run(debug=True)
